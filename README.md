@@ -17,6 +17,6 @@ A multi protocol breakout HAT for Raspberry Pi that can work with all the models
  Here just use use whatever makes you comfortable.</br>
  4. UART </br>
  Again like with I2C just use what you want .</br>
- 5. LED Indicator <\br>
- The led indicator is present to offer the posibility to give visual feedback of the operations in your scripts. <\br>
+ 5. LED Indicator </br>
+ The led indicator is present to offer the posibility to give visual feedback of the operations in your scripts. </br>
  
