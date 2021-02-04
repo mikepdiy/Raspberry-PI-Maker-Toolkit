@@ -1,0 +1,19 @@
+First we will look at SPI0 
+
+Connect to your PI and then : 
+
+sudo apt update
+
+sudo apt install flashrom 
+
+sudo raspi-config ( from interfaces enable SPI && save and exit)
+
+Then enable SPI in the kernel:
+
+modprobe spidev
+modprobe spi_bcm2835
+
+Now you can connect the carrier board with the flash memory on it to the RPI HAT SPI0 Port and check if the Memory is recognized :
+
+ flashrom -p linux_spi:dev=/dev/spidev0.0,spispeed=512
+
