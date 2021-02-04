@@ -1,7 +1,7 @@
 # Raspberry-PI-Maker-Toolkit
 ![](pic_rpi_jtag.jpg)
 A multi protocol breakout HAT for Raspberry Pi that can work with all the models that have the 40 GPIO making this a versatile HAT for the maker in you plus the cheapest option to get into JTAG, SWDIO , SPI, I2C and UART .<br/>
- I was sick and tired of using expensive brand's to flash my projects under windows and every single time I had to figure out what was wrong. What update was going to crash which part? Will it be the driver ? Maybe one of the softwares in the chain ? So I decied to try and use OpenOCD under linux as the Raspberry Pi is a great candidate to be used as an interface for it. Once I got all working ( on a RPI0W) I never looked back and it is very straight forward to get all working. <\br>
+ I was sick and tired of using expensive brand's to flash my projects under windows and every single time I had to figure out what was wrong. What update was going to crash which part? Will it be the driver ? Maybe one of the softwares in the chain ? So I decied to try and use OpenOCD under linux as the Raspberry Pi is a great candidate to be used as an interface for it. Once I got all working ( on a RPI0W) I never looked back and it is very straight forward to get all working. </br>
  
  # How to use it ?
  
