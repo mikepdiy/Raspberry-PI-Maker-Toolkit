@@ -1,0 +1,14 @@
+Please use the script kindly prodivded for learnign purposes here : https://github.com/simonprickett/bash-traffic-lights-pi/blob/master/trafficlights.sh
+Just change in it : 
+
+# Assign names to GPIO pin numbers for each light
+RED=9
+YELLOW=10
+GREEN=11
+
+to 
+
+# Assign names to GPIO pin numbers for each light
+BLUE=4
+RED=17
+GREEN=27
