@@ -1,0 +1,73 @@
+After you connect to your PI run :
+sudo apt-get update
+Then<
+sudo apt-get install git autoconf libtool make pkg-config libusb-1.0-0 libusb-1.0-0-dev
+Then
+git clone http://openocd.zylin.com/openocd<
+Then
+cd openocd 
+./bootstrap 
+The config below should work for all RPI but my setup is based around the Pi0W so I am not exploring the changes that can be made for PI3 or PI4
+./configure --enable-sysfsgpio --enable-bcm2835gpio 
+This will take about 1h-1h30min
+make
+sudo make install
+Now OpenOCD is installed ! 
+You can see the list of interfaces available in /usr/local/share/openocd/scripts/interface<
+We have to create a configuration file ! 
+cd ~ 
+mkdir bootloader
+cd bootloader
+HERE PUT THE BOOTLOADER IN *.bin format in the folder
+
+In the same directory, make a new file called openocd.cfg
+nano openocd.cfg
+Paste in the following by changing the needed details ( uncomment or comment plus file path)
+adapter driver bcm2835gpio
+
+# Raspi1 peripheral_base address
+ bcm2835gpio_peripheral_base 0x20000000
+# Raspi2 and Raspi3 peripheral_base address
+#bcm2835gpio_peripheral_base 0x3F000000
+
+# Raspi1 BCM2835: (700Mhz)
+ bcm2835gpio_speed_coeffs 113714 28
+# Raspi2 BCM2836 (900Mhz):
+# bcm2835gpio_speed_coeffs 146203 36
+# Raspi3 BCM2837 (1200Mhz): 
+#bcm2835gpio_speed_coeffs 194938 48
+
+source [find interface/raspberrypi-native.cfg]
+
+bcm2835gpio_swd_nums 25 24
+#bcm2835gpio_trst_num 7
+#bcm2835gpio_srst_num 18
+
+transport select swd
+
+set CHIPNAME at91samd21g18
+source [find target/at91samdXX.cfg]
+ 
+# did not yet manage to make a working setup using srst
+#reset_config srst_only
+reset_config  srst_nogate
+ 
+adapter srst delay 100
+adapter srst pulse_width 100
+ 
+init
+targets
+reset halt
+at91samd bootloader 0
+program bootloader_ib.bin verify
+at91samd bootloader 8192
+reset
+shutdown
+exit
+
+Now press CTROL+O then Enter and CTRL+X ( Overwrite/save & exit)
+
+Then run sudo openocd (no other args, its all in the config!) in the directory.
+
+Please check the Adafruit guide for a visual feedback reproduction here : https://learn.adafruit.com/programming-microcontrollers-using-openocd-on-raspberry-pi/wiring-and-test
+
