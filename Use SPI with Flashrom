@@ -16,4 +16,45 @@ modprobe spi_bcm2835
 Now you can connect the carrier board with the flash memory on it to the RPI HAT SPI0 Port and check if the Memory is recognized :
 
  flashrom -p linux_spi:dev=/dev/spidev0.0,spispeed=512
+ 
+ To dump a memory you can run the following command :
+ 
+ flashrom -p linux_spi:dev=/dev/spidev0.0,spispeed=512 -c CHIPNAME_AS_IDENTIFIED_IN_THE_PREVIOUS_COMMAND -r DESIRED_FILE_NAME.EXTENSION
+ 
+ To write a dump to another memory IC
+ 
+ flashrom -p linux_spi:dev=/dev/spidev0.0,spispeed=512 -c CHIPNAME_AS_IDENTIFIED_IN_THE_PREVIOUS_COMMAND -w DESIRED_FILE_NAME.EXTENSION
+
+If you have to add a few blocks to make the size match use :
+
+truncate -s +NUMBER_OF_BLOCKS DESIRED_FILE_NAME.EXTENSION
+
+
+Be careful and please bear in mind I can not be blamed for any mistake you make or any device that you damage or any other thing that doesn't work in your setup or around it !
+
+Now to use the SPI1 we have to :
+
+Connect to your PI and then : 
+
+sudo apt update
+
+sudo apt install flashrom 
+
+sudo raspi-config ( from interfaces enable SPI && save and exit)
+
+Then enable SPI in the kernel:
+
+modprobe spidev
+modprobe spi_bcm2835
+
+sudo nano /boot/config.txt
+
+Add at the bottom 
+
+dtoverlay=spi1-3cs  #3 chip select
+
+In flashrom
+
+flashrom -p linux_spi:dev=/dev/spidev1.2,spispeed=500
+
 
