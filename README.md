@@ -20,3 +20,7 @@ A multi protocol breakout HAT for Raspberry Pi that can work with all the models
  5. LED Indicator </br>
  The led indicator is present to offer the posibility to give visual feedback of the operations in your scripts. </br>
  
+ # Can I use the information without the HAT ? 
+ Yes you can and you just need some jumper wires but I made the HAT to aid my work . </br>
+ The schematic of the HAT is also available so you can check it out and you can make your own board starting from it .</br>
+ 
