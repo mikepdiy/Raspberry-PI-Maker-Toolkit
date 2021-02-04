@@ -53,6 +53,8 @@ Add at the bottom
 
 dtoverlay=spi1-3cs  #3 chip select
 
+REBOOT
+
 In flashrom
 
 flashrom -p linux_spi:dev=/dev/spidev1.2,spispeed=500
