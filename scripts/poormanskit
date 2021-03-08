@@ -1,0 +1,253 @@
+#!/bin/bash
+
+# Common path for all GPIO access
+BASE_GPIO_PATH=/sys/class/gpio
+
+# Assign names to GPIO pin numbers for each light
+BLUE=4
+RED=17
+GREEN=27
+
+# Assign names to states
+ON="1"
+OFF="0"
+
+# Utility function to export a pin if not already exported
+exportPin()
+{
+  if [ ! -e $BASE_GPIO_PATH/gpio$1 ]; then
+    echo "$1" > $BASE_GPIO_PATH/export
+  fi
+}
+
+# Utility function to set a pin as an output
+setOutput()
+{
+  echo "out" > $BASE_GPIO_PATH/gpio$1/direction
+}
+
+# Utility function to change state of a light
+setLightState()
+{
+  echo $2 > $BASE_GPIO_PATH/gpio$1/value
+}
+
+# Utility function to turn all lights off
+allLightsOff()
+{
+  setLightState $BLUE $OFF
+  setLightState $RED $OFF
+  setLightState $GREEN $OFF
+}
+
+# Ctrl-C handler for clean shutdown
+shutdown()
+{
+  allLightsOff
+  exit 0
+}
+
+trap shutdown SIGINT
+
+# Export pins so that we can use them
+exportPin $BLUE
+exportPin $RED
+exportPin $GREEN
+# Set pins as outputs
+setOutput $BLUE
+setOutput $RED
+setOutput $GREEN
+# Turn lights off to begin
+allLightsOff
+
+
+function led_lights(){
+echo -ne " $(ColorRed ' Press CTRL+C to exit ' )
+"
+while [ 1 ]
+do
+allLightsOff
+setLightState $BLUE $ON
+sleep 1
+setLightState $BLUE $OFF
+setLightState $RED $ON
+sleep 1
+setLightState $BLUE $OFF
+setLightState $RED $OFF
+setLightState $GREEN $ON
+sleep 1
+setLightState $GREEN $OFF
+setLightState $RED $ON
+sleep 1
+setLightState $RED $OFF
+done
+}
+
+function copy_firmware_nondefault_flash(){
+allLightsOff
+setLightState $BLUE $ON
+    echo -ne " $(ColorBlue ' Starting Macro Keyboard Flash Process.')
+"
+cd bootloader/
+sudo openocd -f nondefault.cfg
+setLightState $BLUE $OFF
+cd ..
+setLightState $GREEN $ON
+}
+
+function list_drive() {
+diskname=$(find /media/ -type d ! -empty | grep "usb*")
+if [ -z $diskname ]
+then
+allLightsOff
+      echo -ne " $(ColorRed ' \e[5;1m No drive detected') 
+"
+setLightState $RED $ON
+else
+allLightsOff
+      echo -ne " $(ColorGreen 'Drive detected on path') $diskname
+"
+setLightState $GREEN $ON
+fi
+}
+
+function cp_files() {
+echo -ne " $(ColorBlue ' Format memory UF2 transfer is happening')
+"
+allLightsOff
+setLightState $BLUE $ON
+setLightState $RED $ON
+sudo cp /home/pi/KBflash/format.uf2 $diskname
+allLightsOff
+setLightState $GREEN $ON
+}
+
+function copy_firmware(){
+echo -ne "$(ColorBlue ' Firmware is now copying')
+ "
+allLightsOff
+setLightState $BLUE $ON
+setLightState $GREEN $ON
+sudo cp /home/pi/KBflash/firmware.uf2 $diskname
+allLightsOff
+setLightState $GREEN $ON
+
+}
+
+function copy_config(){
+echo -ne "$(ColorBlue ' Configuration files are being transfered now')
+"
+allLightsOff
+setLightState $GREEN $ON
+setLightState $RED $ON
+sudo cp /home/pi/KBflash/config/* $diskname
+allLightsOff
+setLightState $GREEN $ON
+}
+
+
+function reset_mode() {
+echo -ne "$(ColorBlue ' The board is being reset now')
+"
+sudo openocd -f /home/pi/bootloader/reset.cfg
+}
+
+
+function flash_all(){
+kb_flash 
+sleep 5
+reset_mode
+sleep 4
+list_drive
+format_mem
+sleep 5
+reset_mode
+sleep 4
+list_drive
+copy_firmware
+sleep 5
+reset_mode
+sleep 4
+list_drive
+copy_config
+sudo openocd -f /home/pi/bootloader/reset_final.cfg
+allLightsOff
+setLightState $GREEN $ON
+}
+
+function spi_read(){
+  flashrom -p linux_spi:dev=/dev/spidev0.0,spispeed=512
+}
+
+##
+# Color  Variables
+##
+green='\e[32m'
+blue='\e[34m'
+clear='\e[0m'
+red='\033[0;31m'
+##
+# Color Functions
+##
+
+ColorGreen(){
+	echo -ne $green$1$clear
+}
+ColorBlue(){
+	echo -ne $blue$1$clear
+}
+ColorRed(){
+       echo -ne $red$1$clear
+}
+
+
+# Start the script
+echo "The script is starting 
+"
+allLightsOff
+setLightState $RED $ON
+list_drive
+#if [ -z $diskname ]
+#then
+#      echo "\e[5m No USB memory disk detected"
+#else
+#      echo "USB memory disk detected on path $diskname"
+#fi
+
+
+
+
+menu(){
+echo -ne "
+\e[1mPoor man's toolkit menu :
+$(ColorBlue  '\e[1m1)') LED TEST
+$(ColorGreen '\e[1m2)') List USB Drives
+\e[1m SWD Examples:
+$(ColorGreen '\e[1m3)') Copy UF2 file to USB disk drive 
+$(ColorGreen '\e[1m4)') Flash with Openocd based on non-default CFG
+$(ColorGreen '\e[1m5)') Flash with Openocd based on default CFG
+$(ColorGreen '\e[1m6)') Copy an entire folder content to a USB disk drive
+$(ColorGreen '\e[1m7)') Simulate double press of the RST button thru SWD
+$(ColorGreen '\e[1m8)') Flash Bootloader + copy 2 UF2 files + Copy config files
+SPI Example
+$(ColorRed '\e[1m9)') Check if a memory IC is present with flashrom 
+$(ColorGreen '\e[1m0)') Exit
+$(ColorRed 'Choose an option:') "
+        read a
+        case $a in
+	        1) led_lights ; menu ;;
+	        2) list_drive ; menu ;;
+	        3) cp_files ; menu ;;
+	        4) copy_firmware ; menu ;;
+		5) copy_firmware_nondefault_flash ; menu ;;
+	        6) copy_config ; menu ;; 
+                7) reset_mode ; menu ;;
+                8) flash_all ; menu ;;
+		9) spi_read ; menu ;;
+		0) allLightsOff ; exit 0 ;;
+		*) echo -e $red"Wrong option."$clear; WrongCommand; allLightsOff; setLightState $RED $ON ;;
+        esac
+}
+
+# Call the menu function
+menu

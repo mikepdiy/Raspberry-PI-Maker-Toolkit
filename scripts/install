@@ -1,0 +1,177 @@
+#!/bin/bash
+
+# Common path for all GPIO access
+BASE_GPIO_PATH=/sys/class/gpio
+
+# Assign names to GPIO pin numbers for each light
+BLUE=4
+RED=17
+GREEN=27
+
+# Assign names to states
+ON="1"
+OFF="0"
+
+# Utility function to export a pin if not already exported
+exportPin()
+{
+  if [ ! -e $BASE_GPIO_PATH/gpio$1 ]; then
+    echo "$1" > $BASE_GPIO_PATH/export
+  fi
+}
+
+# Utility function to set a pin as an output
+setOutput()
+{
+  echo "out" > $BASE_GPIO_PATH/gpio$1/direction
+}
+
+# Utility function to change state of a light
+setLightState()
+{
+  echo $2 > $BASE_GPIO_PATH/gpio$1/value
+}
+
+# Utility function to turn all lights off
+allLightsOff()
+{
+  setLightState $BLUE $OFF
+  setLightState $RED $OFF
+  setLightState $GREEN $OFF
+}
+
+# Ctrl-C handler for clean shutdown
+shutdown()
+{
+  allLightsOff
+  exit 0
+}
+
+trap shutdown SIGINT
+
+# Export pins so that we can use them
+exportPin $BLUE
+exportPin $RED
+exportPin $GREEN
+# Set pins as outputs
+setOutput $BLUE
+setOutput $RED
+setOutput $GREEN
+# Turn lights off to begin
+allLightsOff
+
+function flashrom_read(){
+flashrom -p linux_spi:dev=/dev/spidev0.0,spispeed=512
+}
+
+function install_flashrom(){
+  allLightsOff
+sudo apt update -y
+sudo apt install flashrom -y
+modprobe spidev
+modprobe spi_bcm2835
+setLightState $GREEN $ON
+}
+
+function led_lights(){
+while [ 1 ]
+do
+allLightsOff
+  # BLUE
+  setLightState $BLUE $ON
+  sleep 1
+
+  # BLUE and RED
+  setLightState $BLUE $OFF
+  setLightState $RED $ON
+  sleep 1
+
+  # Green
+  setLightState $RED $OFF
+  setLightState $GREEN $ON
+  sleep 1
+ 
+  # RED
+  setLightState $GREEN $OFF
+  setLightState $RED $ON
+  sleep 1
+
+  # RED off
+  setLightState $RED $OFF
+done
+}
+
+function install_openocd(){
+
+allLightsOff
+sudo apt-get update -y
+sudo apt-get install git autoconf libtool make pkg-config libusb-1.0-0 libusb-1.0-0-dev -y
+git clone http://openocd.zylin.com/openocd 
+cd openocd
+./bootstrap
+./configure --enable-sysfsgpio --enable-bcm2835gpio
+make
+sudo make install
+cd ~
+mkdir bootloader
+setLightState $GREEN $ON
+
+
+}
+
+
+##
+# Color  Variables
+##
+green='\e[32m'
+blue='\e[34m'
+clear='\e[0m'
+red='\033[0;31m'
+##
+# Color Functions
+##
+
+ColorGreen(){
+	echo -ne $green$1$clear
+}
+ColorBlue(){
+	echo -ne $blue$1$clear
+}
+ColorRed(){
+       echo -ne $red$1$clear
+}
+
+
+# Start the script
+echo "The Installation script is starting
+ 
+=== Before running ANY OPTION please run sudo apt update ==="
+setLightState $BLUE $ON
+
+
+
+
+menu(){
+echo -ne "
+Menu
+
+$(ColorGreen '1)') Install OpenOCD
+$(ColorGreen '2)') Install Flashrom and Enable SPI0 in Kernel
+$(ColorGreen '3)') Flashrom Read SPI0
+$(ColorGreen '4)') Test LEDs
+$(ColorGreen '0)') Exit
+$(ColorRed 'Choose an option:') "
+        read a
+        case $a in
+	        1) install_openocd ; menu ;;
+	        2) install_flashrom ; menu ;;
+	        3) flashrom_read ; menu ;;
+	        4) led_lights ; menu ;;
+		0) exit 0 ;;
+		*) echo -e $BLUE"Wrong option."$clear; WrongCommand; setLightState $BLUE $ON ;;
+        esac
+}
+
+# Call the menu function
+menu
+

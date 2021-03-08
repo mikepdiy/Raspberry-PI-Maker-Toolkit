@@ -3,6 +3,30 @@
 A multi protocol breakout HAT for Raspberry Pi that can work with all the models that have the 40 GPIO making this a versatile HAT for the maker in you plus the cheapest option to get into JTAG, SWDIO , SPI, I2C and UART .<br/>
  I was sick and tired of using expensive brand's to flash my projects under windows and every single time I had to figure out what was wrong. What update was going to crash which part? Will it be the driver ? Maybe one of the softwares in the chain ? So I decied to try and use OpenOCD under linux as the Raspberry Pi is a great candidate to be used as an interface for it. Once I got all working ( on a RPI0W) I never looked back and it is very straight forward to get all working. </br>
  
+ # Version Differences
+ ![](Jtag diff v1.0-1.1.png)
+ The Old version (V1.0) was only sold to 3 people but I also use it myself and I have realised that using SPI1 was just adding a layer of complexity instead of removing it.<br/>
+ I have decided to put both SPI slots on the SPI0 so that you don't have mess with config.txt and always remeber to disable the SPI1 after using it. <br/>
+ In V1.1 you can enable the SPI0 from raspi-config and leave that enabled no matter what other pins you will use on the board. <br/>
+ The schematics are available for both boards and the picture here will help to differentiate them also.<br/>
+ 
+ # Scripts 
+ 
+ I have wrote 2 small bash scripts that you can use to get started with the board. <br/>
+ "install" is a script that will help you to install flashrom and OpenOCD while "poormanskit" is a script that will help you run thru the led's colors, flash thru SWD using OpenOCD, identify a memory IC over SPI using flashrom and a few other handy functionalities.<br/>
+ Please keep in mind that you need to make this scripts executable ( on raspbian OS "sudo chmod +x scriptname" ) . <br/>
+ For these scripts I have used a template for a bash menu that sadly I have forgotten where I got from but if you happen to be the author or know the author please open an issue and link me to where it can be found I give credit for it .<br/>
+ I will also include in the config folder a few configuration examples dedicated to atsamd21g18 : openocd.cfg ( config for openOCD to flash an "ATsamd21G18" with a bootloader named "bootloader_ib.bin") , reset.cfg ( will simulate thru SWD the double press of the reset button), reset_final.cfg ( will simulate single press on the reset button), test_ic.cfg (will check if it can read/see the IC thru the SWD line).<br/>
+ Folder structure for the scripts to work : <br/>
+ home/pi/ >contains<=> install,poormanskit,bootloader(dir),KBflash,openocd(created at install time of openocd) <br/>
+ bootloader/ >contains<=> bootloader_ib.bin(the bootloader to flash thru swd),openocd.cfg,reset.cfg,reset_final.cfg,test_ic.cfg <br/>
+ KBflash/ >contains<=> config(dir),firmware.uf2,format.uf2 <br/>
+ <br/>
+ In time I will add more details so come back time to time for updates or ask if there is anything that is unclear in the description .
+ Ofc, you can modify all these to your heart's content or just write your own scripts. Mine are here to help out the people that are just starting and in need of a bit of help :-) . <br/>
+ 
+
+ 
  # How to use it ?
  
  1.Jtag and SWD</br>
