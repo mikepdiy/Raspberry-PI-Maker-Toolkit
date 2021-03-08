@@ -4,7 +4,7 @@ A multi protocol breakout HAT for Raspberry Pi that can work with all the models
  I was sick and tired of using expensive brand's to flash my projects under windows and every single time I had to figure out what was wrong. What update was going to crash which part? Will it be the driver ? Maybe one of the softwares in the chain ? So I decied to try and use OpenOCD under linux as the Raspberry Pi is a great candidate to be used as an interface for it. Once I got all working ( on a RPI0W) I never looked back and it is very straight forward to get all working. </br>
  
  # Version Differences
- ![](Jtag_diff v1.0-1.1.png)
+ ![](Jtag_diff_v1.0-1.1.png)
  The Old version (V1.0) was only sold to 3 people but I also use it myself and I have realised that using SPI1 was just adding a layer of complexity instead of removing it.<br/>
  I have decided to put both SPI slots on the SPI0 so that you don't have mess with config.txt and always remeber to disable the SPI1 after using it. <br/>
  In V1.1 you can enable the SPI0 from raspi-config and leave that enabled no matter what other pins you will use on the board. <br/>
